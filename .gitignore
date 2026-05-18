@@ -1,6 +1,7 @@
-.ctxpack/
-ctxpack
-ctxpack.exe
-coverage.out
-reports/
-dist/
+/.ctxpack/
+/ctxpack
+/ctxpack.exe
+/coverage.out
+/reports/
+/dist/
+**/.ctxpack/
