@@ -1,0 +1,19 @@
+tasks:
+  - name: billing-webhook
+    task: add retry logic to the billing webhook
+    budget: 12000
+    expect:
+      - services/billing/**
+      - services/billing/**/*test*
+    avoid:
+      - services/auth/**
+
+  - name: commission-endpoint
+    task: add commission calculation endpoint and update frontend
+    budget: 12000
+    expect:
+      - services/billing/**
+      - packages/api-client/**
+      - apps/web/**
+    avoid:
+      - apps/admin/**

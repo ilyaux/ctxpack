@@ -1,0 +1,37 @@
+budget: 12000
+include_tests: true
+
+ignore:
+  - .git/**
+  - .ctxpack/**
+  - reports/**
+  - tmp/**
+  - dist/**
+  - build/**
+
+priority:
+  - cmd/ctxpack/**
+  - internal/**
+  - README.md
+
+languages:
+  go: true
+  typescript: true
+  javascript: true
+  json: true
+  yaml: true
+  markdown: true
+
+ci:
+  base: origin/main
+  budget: 12000
+  output: .ctxpack/ci-context.md
+  summary_json: reports/ctxpack-diff-summary.json
+  fail_on:
+    - over-budget
+    - omitted-changed
+    - forbidden-paths
+  forbid:
+    - .ctxpack/**
+    - reports/**
+    - dist/**

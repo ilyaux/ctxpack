@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ctxpack.dev/schemas/bench-summary.schema.json",
+  "title": "ctxpack bench summary",
+  "type": "object",
+  "required": [
+    "repo",
+    "generated_at",
+    "indexed_files",
+    "stack",
+    "cache",
+    "tasks"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "repo": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "indexed_files": { "type": "integer", "minimum": 0 },
+    "stack": { "$ref": "#/$defs/stack" },
+    "config_path": { "type": "string" },
+    "cache": { "$ref": "#/$defs/cache" },
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/task_result" }
+    }
+  },
+  "$defs": {
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "languages": { "type": "array", "items": { "type": "string" } },
+        "packageManagers": { "type": "array", "items": { "type": "string" } },
+        "workspaces": { "type": "array", "items": { "type": "string" } },
+        "goModules": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["languages", "packageManagers", "workspaces", "goModules"]
+    },
+    "cache": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "loaded": { "type": "boolean" },
+        "reused_files": { "type": "integer", "minimum": 0 },
+        "parsed_files": { "type": "integer", "minimum": 0 },
+        "removed_files": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["loaded", "reused_files", "parsed_files"]
+    },
+    "task_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "task": { "type": "string" },
+        "budget": { "type": "integer", "minimum": 1 },
+        "estimated_tokens": { "type": "integer", "minimum": 0 },
+        "selected_files": { "type": "integer", "minimum": 0 },
+        "top_files": { "type": "array", "items": { "type": "string" } },
+        "selection": { "type": "array", "items": { "$ref": "#/$defs/file_breakdown" } },
+        "baselines": { "type": "array", "items": { "$ref": "#/$defs/baseline" } },
+        "expected_hits": { "type": "array", "items": { "type": "string" } },
+        "missing_expected": { "type": "array", "items": { "type": "string" } },
+        "avoid_hits": { "type": "array", "items": { "type": "string" } },
+        "output": { "type": "string" },
+        "passed": { "type": "boolean" }
+      },
+      "required": ["name", "task", "budget", "estimated_tokens", "selected_files", "top_files", "passed"]
+    },
+    "file_breakdown": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "full file",
+            "relevant slices",
+            "signatures only",
+            "summary only",
+            "omitted"
+          ]
+        },
+        "score": { "type": "number" },
+        "reasons": { "type": "array", "items": { "type": "string" } },
+        "components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/score_component" }
+        }
+      },
+      "required": ["path", "mode", "score"]
+    },
+    "score_component": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reason": { "type": "string" },
+        "points": { "type": "number" }
+      },
+      "required": ["reason", "points"]
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "full-repo",
+            "repomix-style",
+            "lexical-budget"
+          ]
+        },
+        "description": { "type": "string" },
+        "budget": { "type": "integer", "minimum": 1 },
+        "estimated_tokens": { "type": "integer", "minimum": 0 },
+        "selected_files": { "type": "integer", "minimum": 0 },
+        "top_files": { "type": "array", "items": { "type": "string" } },
+        "expected_hits": { "type": "array", "items": { "type": "string" } },
+        "missing_expected": { "type": "array", "items": { "type": "string" } },
+        "avoid_hits": { "type": "array", "items": { "type": "string" } },
+        "passed": { "type": "boolean" }
+      },
+      "required": ["name", "description", "budget", "estimated_tokens", "selected_files", "passed"]
+    }
+  }
+}

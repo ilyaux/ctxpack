@@ -1,0 +1,10 @@
+tasks:
+  - name: commission-endpoint
+    task: add commission calculation endpoint and update frontend
+    budget: 9000
+    expect:
+      - services/billing/**
+      - packages/api-client/**
+      - apps/web/**
+    avoid:
+      - services/auth/**

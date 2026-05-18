@@ -1,0 +1,125 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Test
+        run: go test ./...
+
+      - name: Run repeatable evals
+        run: |
+          go run ./cmd/ctxpack bench \
+            --repo testdata/fixtures/go-ts-monorepo \
+            --tasks evals/go-ts-monorepo/tasks.yaml \
+            --output reports/evals/go-ts-monorepo \
+            --budget 9000
+          go run ./cmd/ctxpack bench \
+            --repo testdata/fixtures/java-maven-webapp \
+            --tasks evals/java-maven-webapp/tasks.yaml \
+            --output reports/evals/java-maven-webapp \
+            --budget 9000
+
+  build:
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            ext: ""
+          - goos: linux
+            goarch: arm64
+            ext: ""
+          - goos: darwin
+            goarch: amd64
+            ext: ""
+          - goos: darwin
+            goarch: arm64
+            ext: ""
+          - goos: windows
+            goarch: amd64
+            ext: ".exe"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p dist
+          BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          go build \
+            -trimpath \
+            -ldflags "-s -w -X github.com/ilyaux/ctxpack/internal/version.Version=${{ github.ref_name }} -X github.com/ilyaux/ctxpack/internal/version.Commit=${{ github.sha }} -X github.com/ilyaux/ctxpack/internal/version.Date=${BUILD_DATE}" \
+            -o dist/ctxpack-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }} \
+            ./cmd/ctxpack
+
+      - name: Package artifact
+        run: |
+          cd dist
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            zip ctxpack-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}.zip ctxpack-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
+          else
+            tar -czf ctxpack-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz ctxpack-${{ matrix.goos }}-${{ matrix.goarch }}
+          fi
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctxpack-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          awk 'BEGIN{found=0} /^## /{ if(found){exit}; found=1 } found{print}' CHANGELOG.md > release-notes.md
+          cd dist
+          sha256sum * > checksums.txt
+          cd ..
+          gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" >/dev/null 2>&1 || \
+            gh release create "${{ github.ref_name }}" \
+              --repo "${{ github.repository }}" \
+              --title "ctxpack ${{ github.ref_name }}" \
+              --notes-file release-notes.md \
+              --verify-tag
+          gh release upload "${{ github.ref_name }}" dist/* \
+            --repo "${{ github.repository }}" \
+            --clobber

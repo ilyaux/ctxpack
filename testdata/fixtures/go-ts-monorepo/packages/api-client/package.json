@@ -1,0 +1,5 @@
+{
+  "name": "@ctxpack-fixture/api-client",
+  "private": true,
+  "main": "src/billing.ts"
+}

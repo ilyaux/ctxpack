@@ -1,0 +1,104 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build
+        run: go build ./cmd/ctxpack
+
+      - name: Run repeatable evals
+        run: |
+          go run ./cmd/ctxpack bench \
+            --repo testdata/fixtures/go-ts-monorepo \
+            --tasks evals/go-ts-monorepo/tasks.yaml \
+            --output reports/evals/go-ts-monorepo \
+            --budget 9000
+          go run ./cmd/ctxpack bench \
+            --repo testdata/fixtures/java-maven-webapp \
+            --tasks evals/java-maven-webapp/tasks.yaml \
+            --output reports/evals/java-maven-webapp \
+            --budget 9000
+
+      - name: Generate PR context pack
+        if: github.event_name == 'pull_request'
+        run: |
+          go run ./cmd/ctxpack ci \
+            --base origin/${{ github.base_ref }} \
+            "review this pull request"
+
+      - name: Upload ctxpack artifacts
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctxpack-pr-context
+          path: |
+            .ctxpack/ci-context.md
+            reports/ctxpack-diff-summary.json
+            reports/evals/**/bench-summary.json
+            reports/evals/**/packs/*.md
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            ext: ""
+          - goos: linux
+            goarch: arm64
+            ext: ""
+          - goos: darwin
+            goarch: amd64
+            ext: ""
+          - goos: darwin
+            goarch: arm64
+            ext: ""
+          - goos: windows
+            goarch: amd64
+            ext: ".exe"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p dist
+          go build \
+            -trimpath \
+            -o dist/ctxpack-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }} \
+            ./cmd/ctxpack
+
+      - name: Upload CI binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctxpack-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*

@@ -1,0 +1,24 @@
+name: Feature Request
+description: Suggest a ctxpack improvement.
+title: "[feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use Case
+      description: What task or repository shape should ctxpack handle better?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should be selected, omitted, or reported?
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Synthetic examples, paths, or benchmark task ideas.

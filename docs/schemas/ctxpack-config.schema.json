@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ctxpack.dev/schemas/ctxpack-config.schema.json",
+  "title": "ctxpack configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "budget": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "include_tests": {
+      "type": "boolean"
+    },
+    "ignore": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "priority": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "languages": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" }
+    },
+    "ci": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "base": { "type": "string" },
+        "budget": { "type": "integer", "minimum": 1 },
+        "output": { "type": "string" },
+        "summary_json": { "type": "string" },
+        "fail_on": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "over-budget",
+              "omitted-changed",
+              "missing-tests",
+              "forbidden-paths",
+              "all"
+            ]
+          }
+        },
+        "forbid": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

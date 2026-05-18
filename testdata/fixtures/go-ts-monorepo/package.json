@@ -1,0 +1,8 @@
+{
+  "name": "ctxpack-fixture",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

@@ -1,0 +1,18 @@
+tasks:
+  - name: java-commission-endpoint
+    task: add commission preview endpoint to the Java billing service and update the JSF billing page
+    budget: 2400
+    expect:
+      - services/billing/**
+      - webapp/**
+    avoid:
+      - services/auth/**
+
+  - name: maven-billing-dependencies
+    task: review Maven module dependencies for the billing service
+    budget: 2500
+    expect:
+      - pom.xml
+      - services/billing/pom.xml
+    avoid:
+      - services/auth/**

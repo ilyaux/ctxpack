@@ -1,0 +1,33 @@
+budget: 12000
+include_tests: true
+
+ignore:
+  - target/**
+  - dist/**
+  - generated/**
+  - vendor/**
+
+priority:
+  - services/billing/**
+  - packages/api-client/**
+  - apps/web/**
+
+languages:
+  go: true
+  typescript: true
+  javascript: true
+  java: true
+  sql: true
+
+ci:
+  base: origin/main
+  budget: 12000
+  output: .ctxpack/ci-context.md
+  summary_json: reports/ctxpack-diff-summary.json
+  fail_on:
+    - over-budget
+    - omitted-changed
+    - missing-tests
+  forbid:
+    - services/auth/**
+    - apps/admin/**

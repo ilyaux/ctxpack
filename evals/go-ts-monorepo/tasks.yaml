@@ -1,0 +1,20 @@
+tasks:
+  - name: commission-endpoint
+    task: add commission calculation endpoint and update frontend
+    budget: 9000
+    expect:
+      - services/billing/**
+      - packages/api-client/**
+      - apps/web/**
+    avoid:
+      - services/auth/**
+
+  - name: billing-client-ui
+    task: update the billing page to preview commission through the shared api client
+    budget: 9000
+    expect:
+      - apps/web/**
+      - packages/api-client/**
+      - services/billing/**
+    avoid:
+      - services/auth/**

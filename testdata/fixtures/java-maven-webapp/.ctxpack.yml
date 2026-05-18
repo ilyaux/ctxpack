@@ -1,0 +1,12 @@
+budget: 9000
+include_tests: true
+
+ignore:
+  - .ctxpack/**
+  - reports/**
+  - bench/**
+  - .ctxpack.yml
+
+priority:
+  - services/billing/**
+  - webapp/**

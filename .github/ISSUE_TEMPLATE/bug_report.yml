@@ -1,0 +1,27 @@
+name: Bug Report
+description: Report a reproducible ctxpack bug.
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Commands, repository shape, and expected output.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: ctxpack version, OS, Go version, agent/tool used.
+    validations:
+      required: true

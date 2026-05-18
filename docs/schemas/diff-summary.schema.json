@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ctxpack.dev/schemas/diff-summary.schema.json",
+  "title": "ctxpack diff summary",
+  "type": "object",
+  "required": [
+    "repository",
+    "task",
+    "generated_at",
+    "diff_base",
+    "budget",
+    "estimated_tokens",
+    "indexed_files",
+    "stack",
+    "cache",
+    "changed_files",
+    "top_files",
+    "selection",
+    "passed"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "repository": { "type": "string" },
+    "task": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "diff_base": { "type": "string" },
+    "budget": { "type": "integer", "minimum": 1 },
+    "estimated_tokens": { "type": "integer", "minimum": 0 },
+    "indexed_files": { "type": "integer", "minimum": 0 },
+    "stack": { "$ref": "#/$defs/stack" },
+    "config_path": { "type": "string" },
+    "cache": { "$ref": "#/$defs/cache" },
+    "changed_files": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/changed_file" }
+    },
+    "selected_changed_files": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "omitted_changed_files": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "top_files": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "selection": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/selection" }
+    },
+    "review_checklist": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "passed": { "type": "boolean" },
+    "checks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "markdown_output": { "type": "string" }
+  },
+  "$defs": {
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "languages": { "type": "array", "items": { "type": "string" } },
+        "packageManagers": { "type": "array", "items": { "type": "string" } },
+        "workspaces": { "type": "array", "items": { "type": "string" } },
+        "goModules": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["languages", "packageManagers", "workspaces", "goModules"]
+    },
+    "cache": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "loaded": { "type": "boolean" },
+        "reused_files": { "type": "integer", "minimum": 0 },
+        "parsed_files": { "type": "integer", "minimum": 0 },
+        "removed_files": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["loaded", "reused_files", "parsed_files"]
+    },
+    "changed_file": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "old_path": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": [
+            "added",
+            "copied",
+            "changed",
+            "deleted",
+            "modified",
+            "renamed",
+            "type changed",
+            "unmerged",
+            "untracked"
+          ]
+        },
+        "additions": { "type": "integer", "minimum": 0 },
+        "deletions": { "type": "integer", "minimum": 0 },
+        "binary": { "type": "boolean" },
+        "sources": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["path", "status"]
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "full file",
+            "relevant slices",
+            "signatures only",
+            "summary only",
+            "omitted"
+          ]
+        },
+        "estimated_tokens": { "type": "integer", "minimum": 0 },
+        "score": { "type": "number" },
+        "changed": { "type": "boolean" },
+        "is_test": { "type": "boolean" },
+        "reasons": { "type": "array", "items": { "type": "string" } },
+        "components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/score_component" }
+        }
+      },
+      "required": ["path", "mode", "estimated_tokens", "score", "changed"]
+    },
+    "score_component": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reason": { "type": "string" },
+        "points": { "type": "number" }
+      },
+      "required": ["reason", "points"]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "over-budget",
+            "omitted-changed",
+            "missing-tests",
+            "forbidden-paths"
+          ]
+        },
+        "passed": { "type": "boolean" },
+        "details": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["name", "passed"]
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ctxpack.dev/schemas/bench-tasks.schema.json",
+  "title": "ctxpack bench tasks",
+  "description": "Task file accepted by ctxpack bench. YAML and JSON use the same shape.",
+  "oneOf": [
+    {
+      "type": "array",
+      "items": { "$ref": "#/$defs/task" }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tasks"],
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/task" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "task"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1
+        },
+        "budget": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expect": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "avoid": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
