@@ -13,11 +13,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: "1.26"
 
@@ -49,7 +49,7 @@ jobs:
 
       - name: Upload ctxpack artifacts
         if: always() && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ctxpack-pr-context
           path: |
@@ -82,9 +82,9 @@ jobs:
             ext: ".exe"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: "1.26"
 
@@ -101,7 +101,7 @@ jobs:
             ./cmd/ctxpack
 
       - name: Upload CI binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ctxpack-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/*
